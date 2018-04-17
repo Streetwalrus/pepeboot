@@ -25,7 +25,7 @@ clean:
 # Build pepeboot and pack the initramfs
 @initramfs:
 	cargo build --release
-	mkdir -p build/initrd/{dev,proc}
+	mkdir -p build/initrd/{dev,proc,sys,mnt}
 	cp target/i686-unknown-linux-musl/release/pepeboot build/initrd/init
 	strip build/initrd/init
 	cd build/initrd \
