@@ -1,0 +1,13 @@
+[package]
+name = "pepeboot"
+version = "0.1.0"
+authors = ["Dan Elkouby <streetwalkermc@gmail.com>"]
+
+[dependencies]
+
+[profile.release]
+panic = "abort"
+lto = true
+codegen-units = 1
+incremental = false
+opt-level = "z"
