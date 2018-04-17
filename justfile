@@ -51,11 +51,11 @@ _kernel_prepare:
 	cp build/linux_build/arch/x86/boot/bzImage build
 
 # Kernel menuconfig
-@menuconfig:
+@menuconfig: _kernel_prepare
 	make -C build/linux_build menuconfig
 
 # Save kernel config
-@saveconfig:
+@saveconfig: _kernel_prepare
 	make -C build/linux_build savedefconfig
 	mv {{kernel_defconfig}}{,.old}
 	cp build/linux_build/defconfig {{kernel_defconfig}}
