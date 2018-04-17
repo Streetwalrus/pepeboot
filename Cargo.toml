@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Dan Elkouby <streetwalkermc@gmail.com>"]
 
 [dependencies]
+libc = "0.2"
 
 [profile.release]
 panic = "abort"

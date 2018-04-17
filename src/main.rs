@@ -1,6 +1,7 @@
 #![feature(alloc_system, global_allocator, allocator_api)]
 
 extern crate alloc_system;
+extern crate libc;
 
 use alloc_system::System;
 
@@ -11,6 +12,16 @@ use std::error::Error;
 
 fn main() -> Result<(), Box<Error>> {
     println!("Hello, world!");
+
+    unsafe {
+        // TODO: mount procfs and sysfs, and don't hardcode this
+        libc::mount(
+            std::ffi::CString::new("dev").unwrap().as_ptr(),
+            std::ffi::CString::new("/dev").unwrap().as_ptr(),
+            std::ffi::CString::new("devtmpfs").unwrap().as_ptr(),
+            libc::MS_NOSUID,
+            std::ptr::null());
+    }
 
     let devs = std::fs::read_dir("/dev")?;
     for dev in devs {

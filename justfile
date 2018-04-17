@@ -12,7 +12,10 @@ all: initramfs kernel
 run +QEMU_ARGS='': all
 	qemu-system-x86_64 {{QEMU_ARGS}} \
 		-kernel build/bzImage \
-		-initrd build/pepeboot.cpio.xz
+		-initrd build/pepeboot.cpio.xz \
+		-drive id=disk,file=disk.img,if=none \
+		-device ahci,id=ahci \
+		-device ide-drive,drive=disk,bus=ahci.0
 
 # Remove all temporary files and build artifacts
 clean:
