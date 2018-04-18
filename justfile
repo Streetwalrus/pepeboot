@@ -3,7 +3,7 @@ kernel_source = "linux-" + kernel_release
 kernel_archive = kernel_source + ".tar.xz"
 kernel_url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/" + kernel_archive
 kernel_defconfig = "pepeboot_defconfig"
-export ARCH = "i386"
+export ARCH = "x86_64"
 
 # Build everything
 all: initramfs kernel
@@ -26,7 +26,7 @@ clean:
 @initramfs:
 	cargo build --release
 	mkdir -p build/initrd/{dev,proc,sys,mnt}
-	cp target/i686-unknown-linux-musl/release/pepeboot build/initrd/init
+	cp target/x86_64-unknown-linux-musl/release/pepeboot build/initrd/init
 	strip build/initrd/init
 	cd build/initrd \
 		&& find -mindepth 1 -printf '%P\0' \

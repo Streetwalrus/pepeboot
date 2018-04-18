@@ -2,6 +2,7 @@
 
 extern crate alloc_system;
 extern crate libc;
+extern crate nix;
 
 use alloc_system::System;
 
@@ -10,6 +11,18 @@ static A: System = System;
 
 use std::error::Error;
 use std::io::Read;
+use std::os::unix::io::AsRawFd;
+
+use libc::{c_int,c_ulong};
+
+unsafe fn kexec_file_load(kernel_fd: c_int, initrd_fd: c_int,
+                   cmdline_len: c_ulong, cmdline: *const libc::c_char,
+                   flags: c_ulong) -> libc::c_long {
+    libc::syscall(libc::SYS_kexec_file_load,
+                  kernel_fd, initrd_fd,
+                  cmdline_len, cmdline,
+                  flags) as libc::c_long
+}
 
 fn main() -> Result<(), Box<Error>> {
     println!("Hello, world!");
@@ -29,6 +42,11 @@ fn main() -> Result<(), Box<Error>> {
             libc::MS_NOSUID,
             std::ptr::null());
     }
+
+    let mut uptime = String::new();
+    let mut f = std::fs::File::open("/proc/uptime")?;
+    f.read_to_string(&mut uptime)?;
+    print!("{}", uptime);
 
     let mut partitions = String::new();
     let mut f = std::fs::File::open("/proc/partitions")?;
@@ -50,10 +68,26 @@ fn main() -> Result<(), Box<Error>> {
                 for f in l {
                     println!("{}", f?.path().display());
                 }
-                break
+                let kernel = std::fs::File::open("/mnt/vmlinuz-linux")?;
+                let initrd = std::fs::File::open("/mnt/initramfs-linux.img")?;
+                let cmdline = std::ffi::CString::new("rw root=UUID=e42b82b7-d249-4b6a-9258-bac783078612 iomem=relaxed amdgpu.dc=1").unwrap();
+                let cmdline_ptr = cmdline.as_ptr();
+                let cmdline_len = libc::strlen(cmdline_ptr) as u64;
+                println!("{}", cmdline_len);
+                let rc = kexec_file_load(kernel.as_raw_fd(), initrd.as_raw_fd(),
+                                cmdline_len + 1, cmdline_ptr,
+                                0);
+                println!("{} {}", rc, nix::errno::errno());
+                libc::reboot(libc::RB_KEXEC);
+                break;
             }
         }
     }
+
+    let mut uptime = String::new();
+    let mut f = std::fs::File::open("/proc/uptime")?;
+    f.read_to_string(&mut uptime)?;
+    print!("{}", uptime);
 
     loop {}
 }
