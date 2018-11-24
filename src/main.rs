@@ -1,11 +1,7 @@
-#![feature(alloc_system, global_allocator, allocator_api)]
-
-extern crate alloc_system;
 extern crate libc;
 extern crate nix;
 
-use alloc_system::System;
-
+use std::alloc::System;
 #[global_allocator]
 static A: System = System;
 
@@ -70,7 +66,7 @@ fn main() -> Result<(), Box<Error>> {
                 }
                 let kernel = std::fs::File::open("/mnt/vmlinuz-linux")?;
                 let initrd = std::fs::File::open("/mnt/initramfs-linux.img")?;
-                let cmdline = std::ffi::CString::new("rw root=UUID=e42b82b7-d249-4b6a-9258-bac783078612 iomem=relaxed amdgpu.dc=1").unwrap();
+                let cmdline = std::ffi::CString::new("rw root=UUID=e42b82b7-d249-4b6a-9258-bac783078612 iomem=relaxed quiet").unwrap();
                 let cmdline_ptr = cmdline.as_ptr();
                 let cmdline_len = libc::strlen(cmdline_ptr) as u64;
                 println!("{}", cmdline_len);
