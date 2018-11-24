@@ -1,4 +1,4 @@
-kernel_release = "4.14.34"
+kernel_release = "4.14.83"
 kernel_source = "linux-" + kernel_release
 kernel_archive = kernel_source + ".tar.xz"
 kernel_url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/" + kernel_archive
@@ -38,10 +38,13 @@ _kernel_prepare:
 	#!/bin/sh
 	set -e
 	mkdir -p build
-	[[ ! -f build/{{kernel_archive}} ]] \
-		&& wget {{kernel_url}} -O build/{{kernel_archive}}
-	[[ ! -d build/{{kernel_source}} ]] \
-		&& tar xJf build/{{kernel_archive}} -C build
+	if [ ! -f build/{{kernel_archive}} ]; then
+		wget {{kernel_url}} -O build/{{kernel_archive}}
+	fi
+	if [ ! -d build/{{kernel_source}} ]; then
+		rm -rf build/linux_build
+		tar xJf build/{{kernel_archive}} -C build
+	fi
 	if [ ! -d build/linux_build ]; then
 		mkdir build/linux_build
 		cp {{kernel_defconfig}} build/linux_build/.config
