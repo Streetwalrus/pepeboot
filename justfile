@@ -2,7 +2,7 @@ kernel_release = "4.14.83"
 kernel_source = "linux-" + kernel_release
 kernel_archive = kernel_source + ".tar.xz"
 kernel_url = "https://cdn.kernel.org/pub/linux/kernel/v4.x/" + kernel_archive
-kernel_defconfig = "pepeboot_defconfig"
+kernel_defconfig = "smugloader_defconfig"
 export ARCH = "x86_64"
 
 # Build everything
@@ -12,7 +12,7 @@ all: initramfs kernel
 run +QEMU_ARGS='': all
 	qemu-system-x86_64 {{QEMU_ARGS}} \
 		-kernel build/bzImage \
-		-initrd build/pepeboot.cpio.xz \
+		-initrd build/smugloader.cpio.xz \
 		-drive id=disk,file=disk.img,if=none \
 		-device ahci,id=ahci \
 		-device ide-drive,drive=disk,bus=ahci.0
@@ -22,17 +22,17 @@ clean:
 	rm -rf target *_defconfig.old \
 		build/{bzImage,initrd,*.cpio.xz,linux_build}
 
-# Build pepeboot and pack the initramfs
+# Build smugloader and pack the initramfs
 @initramfs:
 	cargo build --release
 	mkdir -p build/initrd/{dev,proc,sys,mnt}
-	cp target/x86_64-unknown-linux-musl/release/pepeboot build/initrd/init
+	cp target/x86_64-unknown-linux-musl/release/smugloader build/initrd/init
 	strip build/initrd/init
 	cd build/initrd \
 		&& find -mindepth 1 -printf '%P\0' \
 		| LANG=C bsdcpio -0 -o -H newc -R +0:+0 \
 		| xz -C crc32 \
-		> ../pepeboot.cpio.xz
+		> ../smugloader.cpio.xz
 
 _kernel_prepare:
 	#!/bin/sh
